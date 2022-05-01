@@ -1,0 +1,7 @@
+ bs4
+ tqdm
+ colorama
+ rquests
+ urllib3
+ termcolor
+ datetime
