@@ -37,8 +37,6 @@ def write_subs_to_file(subdomain, output_file):
 
 def main():
     banner()
-    subdomains = []
-
     args = parse_args()
     target = parse_url(args.domain)
     output = args.output
@@ -47,12 +45,9 @@ def main():
 
     if req.status_code != 200:
         print(f'{Fore.RED}[*] Information Not Available!')
-        
-
-    for (key,value) in enumerate(req.json()):
-        subdomains.append(value['name_value'])
 
 
+    subdomains = [value['name_value'] for value in req.json()]
     subs = sorted(set(subdomains))
 
     for s in subs:

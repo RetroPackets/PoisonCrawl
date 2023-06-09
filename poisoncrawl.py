@@ -68,7 +68,7 @@ print(f"""{Fore.WHITE}
 print(f"{Fore.CYAN}")
 crawl1 = input(f"Enter Website : {Fore.GREEN}")
 
-for i in tqdm (range (1000), 
+for _ in tqdm (range (1000), 
                desc=f"{Fore.MAGENTA}Loading…", 
                ascii=False, ncols=75):
     time.sleep(0.01)
@@ -77,9 +77,9 @@ for i in tqdm (range (1000),
 
 
 print(f"""
-{Fore.WHITE}[*] Extracting Links From {Fore.GREEN}""" + crawl1)
+{Fore.WHITE}[*] Extracting Links From {Fore.GREEN}{crawl1}""")
 print("")
-os.system("python3 src/linkscrape.py -d https://" + crawl1)
+os.system(f"python3 src/linkscrape.py -d https://{crawl1}")
 
 print(f"""
 {Fore.WHITE}[*] RUNNING SUBDOMAIN SCAN ON WEBSITE{Fore.MAGENTA}
@@ -88,65 +88,81 @@ print(f"""
     Is Scanning 20,000 Subdomains
     From File {Fore.BLUE}[subdomains.txt]{Fore.WHITE}
 """)
-os.system("python3 src/subs.py https://" + crawl1)
+os.system(f"python3 src/subs.py https://{crawl1}")
+
+print(
+    f"""
+{Fore.WHITE}[*] CONFIRMING SUBDOMAIN RESULTS FOR{Fore.GREEN} {crawl1}"""
+)
+print(f"{Fore.YELLOW}")
+os.system(f"python3 src/subs2.py -d https://{crawl1}")
+
+print(
+    f"""
+{Fore.WHITE}[*] CHECKING FOR OPEN PORTS FOR{Fore.GREEN} {crawl1}"""
+)
+print(f"{Fore.YELLOW}")
+os.system(f"nmap {crawl1}")
+
+print(
+    f"""
+{Fore.WHITE}[*] EXTRACTING NAME SERVERS FROM{Fore.GREEN} {crawl1}"""
+)
+print(f"{Fore.YELLOW}")
+os.system(f"host -t ns {crawl1}")
+
+print(
+    f"""
+{Fore.WHITE}[*] EXTRACTING IP ADDRESSES FROM{Fore.GREEN} {crawl1}"""
+)
+print(f"{Fore.YELLOW}")
+os.system(f"host -t a {crawl1}")
+
+print(
+    f"""
+{Fore.WHITE}[*] EXTRACTING AAAA RECORD FROM{Fore.GREEN} {crawl1}"""
+)
+print(f"{Fore.YELLOW}")
+os.system(f"host -t aaaa {crawl1}")
 
 print(f"""
-{Fore.WHITE}[*] CONFIRMING SUBDOMAIN RESULTS FOR{Fore.GREEN} """ + crawl1)
+{Fore.WHITE}[*] RUNNING MX SCAN FOR{Fore.GREEN} {crawl1}""")
 print(f"{Fore.YELLOW}")
-os.system("python3 src/subs2.py -d https://" + crawl1)
+os.system(f"host -t mx {crawl1}")
 
-print(f"""
-{Fore.WHITE}[*] CHECKING FOR OPEN PORTS FOR{Fore.GREEN} """ + crawl1)
+print(
+    f"""
+{Fore.WHITE}[*] EXTRACTING SOA RECORD FROM{Fore.GREEN} {crawl1}"""
+)
 print(f"{Fore.YELLOW}")
-os.system("nmap " + crawl1)
+os.system(f"host -t soa {crawl1}")
 
-print(f"""
-{Fore.WHITE}[*] EXTRACTING NAME SERVERS FROM{Fore.GREEN} """ + crawl1)
+print(
+    f"""
+{Fore.WHITE}[*] RUNNING TRACEROUTE SCAN FOR{Fore.GREEN} {crawl1}"""
+)
 print(f"{Fore.YELLOW}")
-os.system("host -t ns " + crawl1)
+os.system(f"nmap -Pn -T4 --traceroute www.{crawl1}")
 
-print(f"""
-{Fore.WHITE}[*] EXTRACTING IP ADDRESSES FROM{Fore.GREEN} """ + crawl1)
+print(
+    f"""
+{Fore.WHITE}[*] CHECKING FOR DOS VULNS FOR{Fore.GREEN} {crawl1}"""
+)
 print(f"{Fore.YELLOW}")
-os.system("host -t a " + crawl1)
-
-print(f"""
-{Fore.WHITE}[*] EXTRACTING AAAA RECORD FROM{Fore.GREEN} """ + crawl1)
-print(f"{Fore.YELLOW}")
-os.system("host -t aaaa " + crawl1)
-
-print(f"""
-{Fore.WHITE}[*] RUNNING MX SCAN FOR{Fore.GREEN} """ + crawl1)
-print(f"{Fore.YELLOW}")
-os.system("host -t mx " + crawl1)
-
-print(f"""
-{Fore.WHITE}[*] EXTRACTING SOA RECORD FROM{Fore.GREEN} """ + crawl1)
-print(f"{Fore.YELLOW}")
-os.system("host -t soa " + crawl1)
-
-print(f"""
-{Fore.WHITE}[*] RUNNING TRACEROUTE SCAN FOR{Fore.GREEN} """ + crawl1)
-print(f"{Fore.YELLOW}")
-os.system("nmap -Pn -T4 --traceroute www." + crawl1)
-
-print(f"""
-{Fore.WHITE}[*] CHECKING FOR DOS VULNS FOR{Fore.GREEN} """ + crawl1)
-print(f"{Fore.YELLOW}")
-os.system("nmap -v --script dos " + crawl1)
+os.system(f"nmap -v --script dos {crawl1}")
 
 
 print(f"""
-{Fore.WHITE}[*] EXTRACTING EMAILS FROM{Fore.GREEN} """ + crawl1)
+{Fore.WHITE}[*] EXTRACTING EMAILS FROM{Fore.GREEN} {crawl1}""")
 print(f"{Fore.YELLOW}")
 
 
-starting_url = ('http://'+crawl1+'/')
+starting_url = f'http://{crawl1}/'
 
 unprocessed_urls = deque([starting_url])
-processed_urls = set()
 emails = set()
 
+processed_urls = set()
 while len(unprocessed_urls):
 
     url = unprocessed_urls.popleft()
@@ -156,7 +172,7 @@ while len(unprocessed_urls):
     base_url = "{0.scheme}://{0.netloc}".format(parts)
     path = url[:url.rfind('/')+1] if '/' in parts.path else url
 
-    print("[*] Crawling URL %s" % url)
+    print(f"[*] Crawling URL {url}")
     try:
         response = requests.get(url)
     except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
@@ -167,14 +183,14 @@ while len(unprocessed_urls):
     print(emails)
     soup = BeautifulSoup(response.text, 'lxml')
 
-    
+
     for anchor in soup.find_all("a"):
         link = anchor.attrs["href"] if "href" in anchor.attrs else ''
         if link.startswith('/'):
             link = base_url + link
         elif not link.startswith('http'):
             link = path + link
-      
-        if not link in unprocessed_urls and not link in processed_urls:
+
+        if link not in unprocessed_urls and link not in processed_urls:
             unprocessed_urls.append(link)
 

@@ -30,10 +30,22 @@ def print_error():
 def showStats(nbrInternalFound, nbrExternalFound, startTime): 
     totalNbr = len(foundLinks)
     time_elapsed = datetime.now() - startTime
-    print(colored("    Link Extraction Finished !\n"
-                                               "    PoisonCrawl found " + str(
-        len(nbrInternalFound)) + " Internal link(s) and " + str(len(nbrExternalFound)) + " External link(s),\n"
-                                                                                         "    Time elapsed {}:".format(time_elapsed).split('.')[0]))
+    print(
+        colored(
+            (
+                "    Link Extraction Finished !\n"
+                "    PoisonCrawl found "
+                + str(len(nbrInternalFound))
+                + " Internal link(s) and "
+                + str(len(nbrExternalFound))
+                + f" External link(s),\n    Time elapsed {time_elapsed}:".split(
+                    '.'
+                )[
+                    0
+                ]
+            )
+        )
+    )
 
 
 def read_args():  
@@ -44,11 +56,11 @@ def read_args():
         print_help()
         exit()
     elif len(sys.argv) == 2:
-        if sys.argv[1] == '' or sys.argv[1] == '-h' or sys.argv[1] == '--help':
+        if sys.argv[1] in ['', '-h', '--help']:
             print_help()
             exit()
     elif len(sys.argv) == 3:
-        if sys.argv[1] == '-d' or sys.argv[1] == '--domain':
+        if sys.argv[1] in ['-d', '--domain']:
             domain = sys.argv[2]
             domainHTML = str(BeautifulSoup(requests.get(domain).content, "html.parser"))
     elif len(sys.argv) == 4:
@@ -94,10 +106,10 @@ def main():
 
 def internalOrExternal(link):  
     if domain in link:
-        print(colored("Found external link: " + link, "green"))
+        print(colored(f"Found external link: {link}", "green"))
         foundExternal.append(link)
     elif link != "":
-        print(colored("Found internal link: " + link, "yellow"))
+        print(colored(f"Found internal link: {link}", "yellow"))
         foundInternal.append(link)
 
 
@@ -106,13 +118,13 @@ def moreCrawl():
     choice = input(
         colored("""
 [*] PoisonCrawl Found """ + str(len(foundExternal)) + " link(s) would you like to crawl them too ? [Y/n] "))
-    if choice == "" or choice == "Y" or choice == "y":
+    if choice in ["", "Y", "y"]:
         domain = foundExternal[0]
         foundExternal.clear()
         foundInternal.clear()
         foundLinks.clear()
         main()
-    elif choice == "n" or choice == "N":
+    elif choice in ["n", "N"]:
         print("")
         exit()
     else:
